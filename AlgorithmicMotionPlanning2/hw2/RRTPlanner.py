@@ -24,7 +24,15 @@ class RRTPlanner(object):
         plan = []
 
         # TODO: Task 4.4
-        
+        tree = RRTTree
+        while not tree.is_goal_exists(tree, self.planning_env.goal):
+            cand_stat = [np.random.uniform(self.planning_env.xlimit), np.random.uniform(self.planning_env.ylimit)]
+            if self.planning_env.state_validity_checker(cand_stat):
+                nearest_state = tree.get_nearest_state(cand_stat)
+                if self.planning_env.edge_validity_checker(cand_stat, nearest_state):
+                    tree.add_edge(tree.get_idx_for_state(nearest_state), tree.get_idx_for_state(cand_stat),
+                                  self.planning_env.compute_distance(nearest_state, cand_stat))
+
         # print total path cost and time
         print('Total cost of path: {:.2f}'.format(self.compute_cost(plan)))
         print('Total time: {:.2f}'.format(time.time()-start_time))
@@ -47,5 +55,8 @@ class RRTPlanner(object):
         @param rand_state The sampled position.
         '''
         # TODO: Task 4.4
-
+        if self.ext_mode == 'E1':
+            pass
+        else:
+            pass
         pass

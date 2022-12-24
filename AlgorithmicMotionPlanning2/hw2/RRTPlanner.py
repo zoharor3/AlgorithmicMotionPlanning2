@@ -24,16 +24,33 @@ class RRTPlanner(object):
         plan = []
 
         # TODO: Task 4.4
+        goal_bias_counter = 0
         tree = RRTTree
-        while not tree.is_goal_exists(tree, self.planning_env.goal):
-            cand_stat = [np.random.uniform(self.planning_env.xlimit), np.random.uniform(self.planning_env.ylimit)]
+        self.tree.add_vertex(self.planning_env.start)
+        while not tree.is_goal_exists(self.tree, self.planning_env.goal):
+            goal_bias_counter += 1
+            [xLimitMin, xLimitMax] = self.planning_env.xlimit
+            [yLimitMin, yLimitMax] = self.planning_env.ylimit
+            if goal_bias_counter < 1/self.goal_prob:
+                cand_stat = np.array([np.random.uniform(xLimitMin,xLimitMax), np.random.uniform(yLimitMin, yLimitMax)])
+            else:
+                cand_stat = self.planning_env.goal
+                goal_bias_counter = 0
             if self.planning_env.state_validity_checker(cand_stat):
-                nearest_state = tree.get_nearest_state(cand_stat)
-                if self.planning_env.edge_validity_checker(cand_stat, nearest_state):
-                    tree.add_edge(tree.get_idx_for_state(nearest_state), tree.get_idx_for_state(cand_stat),
+                [nearest_id, nearest_state] = tree.get_nearest_state(self=self.tree, state=cand_stat)
+                if self.planning_env.edge_validity_checker(state1=cand_stat, state2=nearest_state):
+                    tree.add_vertex(self.tree, cand_stat)
+                    tree.add_edge(self.tree, tree.get_idx_for_state(self.tree, nearest_state),
+                                  tree.get_idx_for_state(self.tree, cand_stat),
                                   self.planning_env.compute_distance(nearest_state, cand_stat))
-
         # print total path cost and time
+        plan.append(self.planning_env.goal)
+        i = 0
+        while tree.get_idx_for_state(self.tree, plan[i]) !=  tree.get_idx_for_state(self.tree, self.planning_env.start):
+            curr_ver_id = tree.get_idx_for_state(self.tree, plan[i])
+            next_ver_id = self.tree.edges[curr_ver_id]
+            i += 1
+            plan.append(self.tree.vertices[next_ver_id].state)
         print('Total cost of path: {:.2f}'.format(self.compute_cost(plan)))
         print('Total time: {:.2f}'.format(time.time()-start_time))
 
@@ -45,8 +62,10 @@ class RRTPlanner(object):
         @param plan A given plan for the robot.
         '''
         # TODO: Task 4.4
-
-        pass
+        tot_cost = 0
+        for i in range(len(plan)-1):
+            tot_cost += self.planning_env.compute_distance(plan[i], plan[i+1])
+        return tot_cost
 
     def extend(self, near_state, rand_state):
         '''

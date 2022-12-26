@@ -32,17 +32,18 @@ class RRTPlanner(object):
             [xLimitMin, xLimitMax] = self.planning_env.xlimit
             [yLimitMin, yLimitMax] = self.planning_env.ylimit
             if goal_bias_counter < 1/self.goal_prob:
-                cand_stat = np.array([np.random.uniform(xLimitMin,xLimitMax), np.random.uniform(yLimitMin, yLimitMax)])
+                cand_state = np.array([np.random.uniform(xLimitMin,xLimitMax), np.random.uniform(yLimitMin, yLimitMax)])
             else:
-                cand_stat = self.planning_env.goal
+                cand_state = self.planning_env.goal
                 goal_bias_counter = 0
-            if self.planning_env.state_validity_checker(cand_stat):
-                [nearest_id, nearest_state] = tree.get_nearest_state(self=self.tree, state=cand_stat)
-                if self.planning_env.edge_validity_checker(state1=cand_stat, state2=nearest_state):
-                    tree.add_vertex(self.tree, cand_stat)
+            if self.planning_env.state_validity_checker(cand_state):
+                [nearest_id, nearest_state] = tree.get_nearest_state(self=self.tree, state=cand_state)
+                cand_state_extend = self.extend(nearest_state, cand_state)
+                if self.planning_env.edge_validity_checker(state1=cand_state_extend, state2=nearest_state):
+                    tree.add_vertex(self.tree, cand_state_extend)
                     tree.add_edge(self.tree, tree.get_idx_for_state(self.tree, nearest_state),
-                                  tree.get_idx_for_state(self.tree, cand_stat),
-                                  self.planning_env.compute_distance(nearest_state, cand_stat))
+                                  tree.get_idx_for_state(self.tree, cand_state_extend),
+                                  self.planning_env.compute_distance(nearest_state, cand_state_extend))
         # print total path cost and time
         plan.append(self.planning_env.goal)
         i = 0
@@ -74,8 +75,11 @@ class RRTPlanner(object):
         @param rand_state The sampled position.
         '''
         # TODO: Task 4.4
+        eta = 0.6
         if self.ext_mode == 'E1':
-            pass
+            return rand_state
         else:
-            pass
-        pass
+            distance = self.planning_env.compute_distance(near_state, rand_state)
+            direction = (rand_state-near_state)*1/distance
+            new_cand_state = near_state+eta*distance*direction
+        return new_cand_state

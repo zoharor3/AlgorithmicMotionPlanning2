@@ -36,9 +36,9 @@ class RRTPlanner(object):
             else:
                 cand_state = self.planning_env.goal
                 goal_bias_counter = 0
-            if self.planning_env.state_validity_checker(cand_state):
-                [nearest_id, nearest_state] = tree.get_nearest_state(self=self.tree, state=cand_state)
-                cand_state_extend = self.extend(nearest_state, cand_state)
+            [nearest_id, nearest_state] = tree.get_nearest_state(self=self.tree, state=cand_state)
+            cand_state_extend = self.extend(nearest_state, cand_state)
+            if self.planning_env.state_validity_checker(cand_state_extend):
                 if self.planning_env.edge_validity_checker(state1=cand_state_extend, state2=nearest_state):
                     tree.add_vertex(self.tree, cand_state_extend)
                     tree.add_edge(self.tree, tree.get_idx_for_state(self.tree, nearest_state),

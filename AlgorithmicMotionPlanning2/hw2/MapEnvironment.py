@@ -11,8 +11,9 @@ from numpy.core.fromnumeric import size
 from shapely.geometry import Point, LineString, Polygon
 import imageio
 
+
 class MapEnvironment(object):
-    
+
     def __init__(self, json_file):
 
         # check if json file exists and load
@@ -23,8 +24,8 @@ class MapEnvironment(object):
             json_dict = json.load(f)
 
         # obtain boundary limits, start and inspection points
-        self.xlimit = [0, json_dict['WIDTH']-1]
-        self.ylimit = [0, json_dict['HEIGHT']-1]
+        self.xlimit = [0, json_dict['WIDTH'] - 1]
+        self.ylimit = [0, json_dict['HEIGHT'] - 1]
         self.start = np.array(json_dict['START'])
         self.goal = np.array(json_dict['GOAL'])
         self.load_obstacles(obstacles=json_dict['OBSTACLES'])
@@ -38,7 +39,7 @@ class MapEnvironment(object):
             raise ValueError('Goal state must be within the map limits');
 
         # if you want to - you can display starting map here
-        #self.visualize_map()
+        self.visualize_map()
 
     def load_obstacles(self, obstacles):
         '''
@@ -48,14 +49,17 @@ class MapEnvironment(object):
         # iterate over all obstacles
         self.obstacles, self.obstacles_edges = [], []
         for obstacle in obstacles:
-            non_applicable_vertices = [x[0] < self.xlimit[0] or x[0] > self.xlimit[1] or x[1] < self.ylimit[0] or x[1] > self.ylimit[1] for x in obstacle]
+            non_applicable_vertices = [
+                x[0] < self.xlimit[0] or x[0] > self.xlimit[1] or x[1] < self.ylimit[0] or x[1] > self.ylimit[1] for x
+                in obstacle]
             if any(non_applicable_vertices):
                 raise ValueError('An obstacle coincides with the maps boundaries!');
-            
+
             # make sure that the obstacle is a closed form
             if obstacle[0] != obstacle[-1]:
                 obstacle.append(obstacle[0])
-                self.obstacles_edges.append([LineString([Point(x[0],x[1]),Point(y[0],y[1])]) for (x,y) in zip(obstacle[:-1], obstacle[1:])])
+                self.obstacles_edges.append(
+                    [LineString([Point(x[0], x[1]), Point(y[0], y[1])]) for (x, y) in zip(obstacle[:-1], obstacle[1:])])
             self.obstacles.append(Polygon(obstacle))
 
     def compute_distance(self, start_state, end_state):
@@ -78,7 +82,8 @@ class MapEnvironment(object):
             state = np.array(state)
 
         # verify that the robot position is between world boundaries
-        if state[0] < self.xlimit[0] or state[1] < self.ylimit[0] or state[0] > self.xlimit[1] or state[1] > self.ylimit[1]:
+        if state[0] < self.xlimit[0] or state[1] < self.ylimit[0] or state[0] > self.xlimit[1] or state[1] > \
+                self.ylimit[1]:
             return False
 
         # verify that the robot is not positioned inside an obstacle
@@ -112,14 +117,13 @@ class MapEnvironment(object):
         '''
 
         # TODO: Task 4.3
-
-        pass
+        return np.linalg.norm(np.array(state) - np.array(self.goal))
 
     # ------------------------#
     # Visualization Functions
     # ------------------------#
 
-    def visualize_map(self, show_map=False, plan=None, tree_edges=None, expanded_nodes=None):
+    def visualize_map(self, show_map=True, plan=None, tree_edges=None, expanded_nodes=None):
         '''
         Visualize map with current state of robot and obstacles in the map.
         @param show_map If to show the map or save it.
@@ -165,7 +169,7 @@ class MapEnvironment(object):
         '''
         # create figure and add background
         plt.figure()
-        back_img = np.zeros((self.ylimit[1]+1, self.xlimit[1]+1))
+        back_img = np.zeros((self.ylimit[1] + 1, self.xlimit[1] + 1))
         plt.imshow(back_img, origin='lower', zorder=0)
 
         return plt
@@ -190,10 +194,10 @@ class MapEnvironment(object):
         @param color The requested color for the plan.
         '''
         # add plan edges to the plt
-        for i in range(0, len(plan)-1):
-            plt.plot([plan[i,0],plan[i+1,0]], [plan[i,1],plan[i+1,1]], color=color, linewidth=1, zorder=20)
+        for i in range(0, len(plan) - 1):
+            plt.plot([plan[i, 0], plan[i + 1, 0]], [plan[i, 1], plan[i + 1, 1]], color=color, linewidth=1, zorder=20)
 
-        return plt 
+        return plt
 
     def visualize_tree_edges(self, plt, tree_edges, color):
         '''
@@ -204,7 +208,7 @@ class MapEnvironment(object):
         '''
         # add plan edges to the plt
         for tree_edge in tree_edges:
-            plt.plot([tree_edge[0][0],tree_edge[1][0]], [tree_edge[0][1],tree_edge[1][1]], color=color, zorder=10)
+            plt.plot([tree_edge[0][0], tree_edge[1][0]], [tree_edge[0][1], tree_edge[1][1]], color=color, zorder=10)
 
         return plt
 
@@ -235,5 +239,5 @@ class MapEnvironment(object):
         point_radius = 0.5
         point_circ = plt.Circle(state, radius=point_radius, color=color, zorder=30)
         plt.gca().add_patch(point_circ)
-    
+
         return plt

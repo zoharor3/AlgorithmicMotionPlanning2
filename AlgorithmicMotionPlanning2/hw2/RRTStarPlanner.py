@@ -15,6 +15,8 @@ class RRTStarPlanner(object):
         self.goal_prob = goal_prob
         self.k = k
 
+        self.found_plan = False
+
     def plan(self):
         '''
         Compute and return the plan. The function should return a numpy array containing the states (positions) of the robot.
@@ -27,6 +29,8 @@ class RRTStarPlanner(object):
         # TODO: Task 4.4
         goal_bias_counter = 0
         tree = RRTTree
+        if self.found_plan == True:  # to run multiple times
+            self.tree = RRTTree(self.planning_env)
         self.tree.add_vertex(self.planning_env.start)
         while not tree.is_goal_exists(self.tree, self.planning_env.goal):
             goal_bias_counter += 1
@@ -58,15 +62,9 @@ class RRTStarPlanner(object):
             plan.append(self.tree.vertices[next_ver_id].state)
         print('Total cost of path: {:.2f}'.format(self.compute_cost(plan)))
         print('Total time: {:.2f}'.format(time.time()-start_time))
-
+        self.found_plan = True
         return np.array(plan)
 
-        
-        # print total path cost and time
-        print('Total cost of path: {:.2f}'.format(self.compute_cost(plan)))
-        print('Total time: {:.2f}'.format(time.time()-start_time))
-
-        return np.array(plan)
 
     def connect_new_state(self, nearest_state, new_state):
         knn_state = []

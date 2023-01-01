@@ -14,6 +14,8 @@ class RRTPlanner(object):
         self.ext_mode = ext_mode
         self.goal_prob = goal_prob
 
+        self.found_plan = False
+
     def plan(self):
         '''
         Compute and return the plan. The function should return a numpy array containing the states (positions) of the robot.
@@ -26,7 +28,9 @@ class RRTPlanner(object):
         # TODO: Task 4.4
         goal_bias_counter = 0
         tree = RRTTree
-        self.tree.add_vertex(self.planning_env.start)
+        if self.found_plan == True:  # to run multiple times
+            self.tree = RRTTree(self.planning_env)
+        tree.add_vertex(self.tree, self.planning_env.start)
         while not tree.is_goal_exists(self.tree, self.planning_env.goal):
             goal_bias_counter += 1
             [xLimitMin, xLimitMax] = self.planning_env.xlimit
@@ -54,7 +58,7 @@ class RRTPlanner(object):
             plan.append(self.tree.vertices[next_ver_id].state)
         print('Total cost of path: {:.2f}'.format(self.compute_cost(plan)))
         print('Total time: {:.2f}'.format(time.time()-start_time))
-
+        self.found_plan = True
         return np.array(plan)
 
     def compute_cost(self, plan):

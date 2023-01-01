@@ -45,10 +45,8 @@ class RRTStarPlanner(object):
             cand_state_extend = self.extend(nearest_state, cand_state)
             if self.planning_env.state_validity_checker(cand_state_extend):
                 # change from rrt
-
-
-                self.connect_new_state(nearest_state, cand_state_extend)
-            # rewire_knn(cand_state_extend,self.k)
+                self.connect_new_state_and_rewire(cand_state_extend)
+                self.k = int(np.log(len(self.tree.vertices)))+1
 
 
 
@@ -66,7 +64,7 @@ class RRTStarPlanner(object):
         return np.array(plan)
 
 
-    def connect_new_state(self, nearest_state, new_state):
+    def connect_new_state_and_rewire(self, new_state):
         knn_state = []
         knn_id = []
         if len(self.tree.vertices) > self.k:  # prevent runtime error
@@ -76,18 +74,26 @@ class RRTStarPlanner(object):
                 knn_state.append(self.tree.vertices[i].state)
                 knn_id.append(i)
         new_costs = []
+        cand_edge_cost = []
         for i in range(len(knn_state)):
-            cand_edge_cost = self.planning_env.compute_distance(knn_state[i], new_state)
-            new_costs.append(self.tree.vertices[knn_id[i]].cost + cand_edge_cost)
+            cand_edge_cost.append(self.planning_env.compute_distance(knn_state[i], new_state))
+            new_costs.append(self.tree.vertices[knn_id[i]].cost + cand_edge_cost[i])
         idx_of_cheapest = np.argmin(new_costs)
         cheapest_state = knn_state[idx_of_cheapest]
+
         if self.planning_env.edge_validity_checker(state1=new_state, state2=cheapest_state):
             self.tree.add_vertex(new_state)
-            self.tree.add_edge(self.tree.get_idx_for_state(cheapest_state),
-                          self.tree.get_idx_for_state(new_state),
+            new_state_id = self.tree.get_idx_for_state(new_state)
+            self.tree.add_edge(self.tree.get_idx_for_state(cheapest_state), new_state_id,
                           self.planning_env.compute_distance(cheapest_state, new_state))
-    def rewire_knn(self, state, k):
-        pass
+
+         # rewire
+            for i in range(len(knn_state)):
+                if self.tree.vertices[knn_id[i]].cost > self.tree.vertices[new_state_id].cost + cand_edge_cost[i]:
+                    if self.planning_env.edge_validity_checker(state1=new_state, state2=knn_state[i]):
+                        self.tree.add_edge(new_state_id, knn_id[i], cand_edge_cost[i])
+                else:
+                    pass
 
     def compute_cost(self, plan):
         '''
@@ -108,7 +114,7 @@ class RRTStarPlanner(object):
         @param rand_state The sampled position.
         '''
         # TODO: Task 4.4
-        eta = 0.6
+        eta = 0.8
         if self.ext_mode == 'E1':
             return rand_state
         else:

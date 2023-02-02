@@ -37,8 +37,10 @@ class RRTMotionPlanner(object):
         @param plan A given plan for the robot.
         '''
         # TODO: Task 2.3
-
-        pass
+        tot_cost = 0
+        for i in range(len(plan)-1):
+            tot_cost += self.planning_env.compute_distance(plan[i], plan[i+1])
+        return tot_cost
 
     def extend(self, near_config, rand_config):
         '''
@@ -47,6 +49,12 @@ class RRTMotionPlanner(object):
         @param rand_config The sampled configuration.
         '''
         # TODO: Task 2.3
-
-        pass
+        eta = 0.6
+        if self.ext_mode == 'E1':
+            return rand_config
+        else:
+            distance = self.planning_env.compute_distance(near_config, rand_config)
+            direction = (rand_config-near_config)*1/distance
+            new_cand_state = near_config+eta*distance*direction
+        return new_cand_state
     

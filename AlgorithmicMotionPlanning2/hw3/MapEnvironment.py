@@ -227,8 +227,14 @@ class MapEnvironment(object):
         @param points2 list of inspected points.
         '''
         # TODO: Task 2.4
+        if len(points1) == 0:
+            points = points2
+        elif len(points2) == 0:
+            points = points1
+        else:
+            points = np.vstack((points1, points2))
+        return np.array(list(set(tuple(p) for p in points)))
 
-        pass
 
     def compute_coverage(self, inspected_points):
         '''
@@ -302,7 +308,7 @@ class MapEnvironment(object):
 
         # show map
         if show_map:
-            #plt.show() # replace savefig with show if you want to display map actively
+            # plt.show() # replace savefig with show if you want to display map actively
             plt.savefig('map.png')
             
         return plt

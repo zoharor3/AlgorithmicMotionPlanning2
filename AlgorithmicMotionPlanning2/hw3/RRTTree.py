@@ -31,8 +31,10 @@ class RRTTree(object):
         # check if vertex has the highest coverage so far, and replace if so
         if self.task == "ip":
             v_coverage = self.planning_env.compute_coverage(inspected_points=inspected_points)
+            self.does_coverage_increased = False
             if v_coverage > self.max_coverage:
                 self.max_coverage = v_coverage
+                self.does_coverage_increased = True
                 self.max_coverage_id = vid
 
         return vid

@@ -6,8 +6,8 @@ from utils import write_plan_stats
 if __name__ == "__main__":
     
     parser = argparse.ArgumentParser(description='script for testing planners')
-    parser.add_argument('-map', '--map', type=str, default='map_plan_p1.json', help='Json file name containing all map information')
-    parser.add_argument('-coverage', '--coverage', type=float, default=0.5, help='percentage of points to inspect (inspection planning)')
+    parser.add_argument('-map', '--map', type=str, default='map_plan_p2.json', help='Json file name containing all map information')
+    parser.add_argument('-coverage', '--coverage', type=float, default=0.2, help='percentage of points to inspect (inspection planning)')
     args = parser.parse_args()
 
     # prepare the map

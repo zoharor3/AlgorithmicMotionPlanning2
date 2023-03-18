@@ -32,7 +32,7 @@ class TaskInspectionPlanner(object):
         stdv = statistics.stdev(delta_distance_end_gripper_plan,mean)
         split_time = [0]
         for i, delta_dist in enumerate(delta_distance_end_gripper_plan):
-            if math.dist([mean],[delta_dist]) > stdv:
+            if delta_dist - mean > stdv:
                 split_time.append(i)
         return split_time
 
@@ -76,11 +76,11 @@ class TaskInspectionPlanner(object):
         elif points2 is None or len(points2) == 0:
             points = points1
         else:
-            points = np.vstack((points1, points2))
+            points = points1 or points2
         if points is None:
             return None
         else:
-            return np.array(list(set(tuple(p) for p in points)))
+            return points
 
 
     def plan_part(self,time_start,time_end):
@@ -119,10 +119,10 @@ class TaskInspectionPlanner(object):
             if self.planning_env.config_validity_checker(cand_config_extend, "inspect"):
                 if self.planning_env.edge_validity_checker(config1=cand_config_extend, config2=nearest_config,robot_type = "inspect"):
                     points_so_far = tree.vertices[nearest_id].inspected_points
-                    current_config_inspected_points = self.planning_env.compute_inspected_timestamps_for_edge(cand_config_extend,
-                                                                                                              nearest_config,
-                                                                                                              timestamp1=cand_time_stamp,
-                                                                                                              timestamp2=nearst_time_stamp)
+                    current_config_inspected_points = self.planning_env.compute_inspected_timestamps_for_edge(nearest_config,
+                                                                                                              cand_config_extend,
+                                                                                                              timestamp1=nearst_time_stamp,
+                                                                                                              timestamp2=cand_time_stamp)
                     if current_config_inspected_points is not None:
                         self.POI_center = cand_config_extend
                     inspected_points = self.compute_union_of_points(points_so_far,
@@ -172,7 +172,7 @@ class TaskInspectionPlanner(object):
         if current_coverage < self.coverage:
             temp_plan_configs, temp_plan_timestamps, temp_current_coverage = self.plan_part(0, total_points)
             if temp_current_coverage > current_coverage:
-                temp_plan_configs, temp_plan_timestamps, temp_current_coverage = plan_configs, plan_timestamps, current_coverage
+                plan_configs, plan_timestamps, current_coverage = temp_plan_configs, temp_plan_timestamps, temp_current_coverage
 
         # store total path cost and time
         path_cost = self.compute_cost(plan_configs)

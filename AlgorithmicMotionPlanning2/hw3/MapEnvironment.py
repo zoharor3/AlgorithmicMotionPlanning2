@@ -452,8 +452,13 @@ class MapEnvironment(object):
             canvas.draw()
             data = np.fromstring(canvas.tostring_rgb(), dtype=np.uint8, sep='')
             data = data.reshape(canvas.get_width_height()[::-1] + (3,))
+            # store images
+            if i % 10 == 0:
+                imageio.imwrite(f'image_{i}.png', data)
             plan_images.append(data)
         
         # store gif
         plan_time = datetime.now().strftime("%d-%m-%Y_%H-%M-%S")
         imageio.mimsave(f'plan_{plan_time}.gif', plan_images, 'GIF', duration=0.05)
+
+

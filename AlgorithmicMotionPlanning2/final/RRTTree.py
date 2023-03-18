@@ -1,5 +1,5 @@
 import operator
-
+import numpy as np
 
 class RRTTree(object):
 
@@ -21,13 +21,13 @@ class RRTTree(object):
         '''
         return 0
 
-    def add_vertex(self, config, inspected_points=None):
+    def add_vertex(self, config, inspected_points=None, time_stamp=0):
         '''
         Add a state to the tree.
         @param config Configuration to add to the tree.
         '''
         vid = len(self.vertices)
-        self.vertices[vid] = RRTVertex(config=config, inspected_points=inspected_points)
+        self.vertices[vid] = RRTVertex(config=config, inspected_points=inspected_points, time_stamp=time_stamp)
 
         # check if vertex has the highest coverage so far, and replace if so
         if self.task == "ip":
@@ -79,31 +79,42 @@ class RRTTree(object):
             return valid_idxs[0]
         return None
 
-    def get_nearest_config(self, config):
+    def get_nearest_config(self, config, time_stamp):
         '''
         Find the nearest vertex for the given config and returns its state index and configuration
         @param config Sampled configuration.
         '''
         # compute distances from all vertices
         dists = []
+        time_angles_normalization_factor = 2*np.pi/len(self.planning_env.gripper_plan)
         for _, vertex in self.vertices.items():
-            dists.append(self.planning_env.robot.compute_distance(config, vertex.config))
+            dists.append(self.planning_env.insp_robot.compute_distance_with_time(vertex.config, config,
+                             vertex.time_stamp*time_angles_normalization_factor,
+                             time_stamp*time_angles_normalization_factor))
 
         # retrieve the id of the nearest vertex
         vid, _ = min(enumerate(dists), key=operator.itemgetter(1))
 
-        return vid, self.vertices[vid].config
+        return vid, self.vertices[vid].config, self.vertices[vid].time_stamp
 
 
 class RRTVertex(object):
 
-    def __init__(self, config, cost=0, inspected_points=None):
+    def __init__(self, config, cost=0, cost_with_time=0, inspected_points=None, time_stamp=0):
         self.config = config
         self.cost = cost
+        self.cost_with_time = cost_with_time
         self.inspected_points = inspected_points
+        self.time_stamp = time_stamp
 
     def set_cost(self, cost):
         '''
         Set the cost of the vertex.
         '''
         self.cost = cost
+
+    def set_cost_with_time(self, cost_with_time):
+        '''
+        Set the cost of the vertex.
+        '''
+        self.cost_with_time = cost_with_time

@@ -289,6 +289,13 @@ class MapEnvironment(object):
 
         return True
 
+    def compute_coverage(self, inspected_points):
+        '''
+        Compute the coverage of the map as the portion of points that were already inspected.
+        @param inspected_points list of inspected points.
+        '''
+        return len(inspected_points)/len(self.gripper_inspected)
+
     # ------------------------#
     # Visualization Functions
     # ------------------------#

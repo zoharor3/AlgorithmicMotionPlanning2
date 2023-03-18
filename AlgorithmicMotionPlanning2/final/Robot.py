@@ -16,13 +16,25 @@ class Robot(object):
         self.joint_color = 'coral'
         self.ee_color = 'cornflowerblue'
 
+
     def compute_distance(self, prev_config, next_config):
         '''
         Compute the euclidean distance betweeen two given configurations.
         @param prev_config Previous configuration.
         @param next_config Next configuration.
         '''
+
         return np.linalg.norm(next_config - prev_config)
+
+    def compute_distance_with_time(self, prev_config, next_config, prev_time_stamp, next_time_stamp):
+        '''
+        Compute the euclidean distance betweeen two given configurations.
+        @param prev_config Previous configuration.
+        @param next_config Next configuration.
+        '''
+        prev_config_plus_ts = np.append(prev_config, prev_time_stamp)
+        next_config_plus_ts = np.append(next_config, next_time_stamp)
+        return np.linalg.norm(next_config_plus_ts - prev_config_plus_ts)
 
     def compute_forward_kinematics(self, given_config):
         '''

@@ -71,9 +71,9 @@ class TaskInspectionPlanner(object):
         @param points1 list of inspected points.
         @param points2 list of inspected points.
         '''
-        if len(points1) == 0:
+        if points1 is None or len(points1) == 0:
             points = points2
-        elif len(points2) == 0:
+        elif points2 is None or len(points2) == 0:
             points = points1
         else:
             points = np.vstack((points1, points2))
@@ -130,7 +130,8 @@ class TaskInspectionPlanner(object):
                     cand_config_extend_id = tree.add_vertex(cand_config_extend, inspected_points=inspected_points, time_stamp=cand_time_stamp)
                     tree.add_edge(nearest_id,
                                        cand_config_extend_id,
-                                       self.robot.compute_distance(self.robot, nearest_config, cand_config_extend, nearst_time_stamp, cand_time_stamp))
+                                       self.robot.compute_distance(nearest_config, cand_config_extend),
+                                  self.robot.compute_distance_with_time(nearest_config, cand_config_extend, nearst_time_stamp, cand_time_stamp))
                     if tree.does_coverage_increased:
                         num_of_iter_no_new_points = 0
 

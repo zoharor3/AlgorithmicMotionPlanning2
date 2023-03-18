@@ -294,7 +294,10 @@ class MapEnvironment(object):
         Compute the coverage of the map as the portion of points that were already inspected.
         @param inspected_points list of inspected points.
         '''
-        return len(inspected_points)/len(self.gripper_inspected)
+        if inspected_points is None:
+            return 0
+        else:
+            return len(inspected_points)/len(self.gripper_inspected)
 
     # ------------------------#
     # Visualization Functions

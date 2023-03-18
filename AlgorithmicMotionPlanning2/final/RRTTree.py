@@ -40,7 +40,7 @@ class RRTTree(object):
 
         return vid
 
-    def add_edge(self, sid, eid, edge_cost=0):
+    def add_edge(self, sid, eid, edge_cost=0, edge_cost_with_time=0):
         '''
         Adds an edge in the tree.
         @param sid start state ID
@@ -48,6 +48,8 @@ class RRTTree(object):
         '''
         self.edges[eid] = sid
         self.vertices[eid].set_cost(cost=self.vertices[sid].cost + edge_cost)
+        self.vertices[eid].set_cost_with_time(cost_with_time=self.vertices[sid].cost_with_time + edge_cost_with_time)
+
 
     def is_goal_exists(self, config):
         '''
